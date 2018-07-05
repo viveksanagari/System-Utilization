@@ -1,0 +1,13 @@
+#!/bin/bash
+
+head -1 /proc/stat > file.txt
+sleep 1s
+for value in {2..60}
+do 
+	head -1 /proc/stat >> file.txt
+	sleep 1s
+done
+
+awk '{sum2+=$2; sum3+=$3; sum4+=$4; sum5+=$5; sum6+=$6; sum7+=$7; sum8+=$8; sum9+=$9;} END {print sum2/60,sum3/60,sum4/60,sum5/60,sum6/60,sum7/60,sum8/60,sum9/60}' file.txt | awk '{print ((($1+$2+$3+$4+$5+$6+$7+$8)-($4+$5))/($1+$2+$3+$4+$5+$6+$7+$8))*100}'
+
+
