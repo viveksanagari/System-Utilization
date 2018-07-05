@@ -1,0 +1,50 @@
+#!/bin/bash
+
+p="U_server_5"
+file="vbox.txt"
+
+uptime=$(cat /proc/uptime | awk '{print $1}')
+uptime=${uptime%.*}
+pid=$(pgrep -f $p) 
+ticks=$(getconf CLK_TCK)
+u=$(cat /proc/$pid/stat | awk '{print $14}')
+s=$(cat /proc/$pid/stat | awk '{print $15}')
+cu=$(cat /proc/$pid/stat | awk '{print $16}')
+cs=$(cat /proc/$pid/stat | awk '{print $17}')
+starttime=$(cat /proc/$pid/stat | awk '{print $22}')
+
+totaltime=$(($u+$s+$cu+$cs))
+st=$((starttime/ticks))
+seconds=$(($uptime - $st))	
+tt=$((totaltime/ticks))
+tts=$(echo "scale=4; (($tt/$seconds))" | bc -l | awk '{printf "%f", $0}')
+cpu=$(echo "scale=4; (($tts * 100))" | bc -l | awk '{printf "%f", $0}')
+
+echo "$cpu" > $file
+
+for value in {2..60}
+do 
+	uptime=$(cat /proc/uptime | awk '{print $1}')
+	uptime=${uptime%.*}
+	pid=$(pgrep -f $p)
+	ticks=$(getconf CLK_TCK)
+	u=$(cat /proc/$pid/stat | awk '{print $14}')
+	s=$(cat /proc/$pid/stat | awk '{print $15}')
+	cu=$(cat /proc/$pid/stat | awk '{print $16}')
+	cs=$(cat /proc/$pid/stat | awk '{print $17}')
+	starttime=$(cat /proc/$pid/stat | awk '{print $22}')
+
+	totaltime=$(($u+$s+$cu+$cs))
+	st=$((starttime/ticks))
+	seconds=$(($uptime - $st))	
+	tt=$((totaltime/ticks))
+	tts=$(echo "scale=4; (($tt/$seconds))" | bc -l | awk '{printf "%f", $0}')
+	cpu=$(echo "scale=4; (($tts * 100))" | bc -l | awk '{printf "%f", $0}')
+
+	echo "$cpu" >> $file
+
+	sleep 1s
+done
+
+awk '{avg+=$1;} END {print avg/60}' $file
+
