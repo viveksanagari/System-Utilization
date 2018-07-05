@@ -1,0 +1,12 @@
+#!/bin/bash
+
+free | awk 'NR==2 {print (($2-($4+$6))/$2)*100}' > mem.txt
+sleep 1s
+
+for value in {2..60}
+do 
+	free | awk 'NR==2 {print (($2-($4+$6))/$2)*100}' >> mem.txt
+	sleep 1s
+done
+
+awk '{sum+=$1;} END {print sum/60}' mem.txt
